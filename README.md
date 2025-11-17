@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Campus Ticket Ops
 
-## Getting Started
+A Next.js 14 ticket management system with admin registration, scanner validation, email delivery, and optional MongoDB persistence. Built with TypeScript and Tailwind CSS.
 
-First, run the development server:
+### Features
+- Admin panel to register attendees (name + mail) and auto-generate ticket numbers
+- Automatic QR + barcode assets per ticket for phone-ready passes
+- Embedded camera scanner (with manual override) to validate and prevent duplicates
+- Nodemailer-powered confirmation emails with the QR/barcode inline
+- API routes for tickets, scanning, email re-sends, and metrics
+- In-memory storage by default with optional MongoDB support via `MONGODB_URI`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Project Structure
+```
+app/
+  page.tsx                # Dashboard overview
+  admin/                  # Ticket registration experience
+  scanner/                # Validation console
+  api/                    # REST endpoints (tickets, scan, email)
+components/
+  ui/                     # Buttons, inputs, cards, toasts
+  admin/                  # Ticket form
+  scanner/                # Scanner widget
+lib/
+  storage.ts              # In-memory + MongoDB store
+  email.ts                # Nodemailer transport + template
+types/
+  ticket.ts               # Shared interfaces
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
+```
+MONGODB_URI="mongodb+srv://..."    # REQUIRED - MongoDB connection string
+MONGODB_DB="tickets"               # optional, defaults to "tickets"
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Gmail SMTP (defaults to sidftww@gmail.com)
+SMTP_HOST="smtp.gmail.com"         # optional, defaults to smtp.gmail.com
+SMTP_PORT="587"                    # optional, defaults to 587
+SMTP_USER="sidftww@gmail.com"       # optional, defaults to sidftww@gmail.com
+SMTP_PASS="your-app-password"      # REQUIRED: Gmail App Password (not regular password)
+EMAIL_FROM="sidftww@gmail.com"     # optional, defaults to sidftww@gmail.com
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Gmail App Password Setup:**
+1. Go to your Google Account settings
+2. Enable 2-Step Verification
+3. Go to "App passwords" (under Security)
+4. Generate a new app password for "Mail"
+5. Copy the 16-character password and set it as `SMTP_PASS`
 
-## Learn More
+If `SMTP_PASS` is missing, ticket creation still works but email delivery is skipped with a logged warning.
 
-To learn more about Next.js, take a look at the following resources:
+### Development
+```bash
+pnpm install
+pnpm dev        # start Next.js dev server
+pnpm lint       # run ESLint via next lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Visit `http://localhost:3000` for the dashboard. Admin and scanner routes reside at `/admin` and `/scanner`.
