@@ -43,8 +43,23 @@ async function getMongoCollection(): Promise<Collection<Ticket>> {
   }
 
   if (!mongoClientPromise) {
+    // MongoDB Atlas (mongodb+srv://) handles TLS automatically via the connection string
+    // Don't override TLS settings - let the connection string handle it
     mongoClientPromise = MongoClient.connect(uri, {
-      serverSelectionTimeoutMS: 5_000,
+      serverSelectionTimeoutMS: 10_000,
+      connectTimeoutMS: 10_000,
+      socketTimeoutMS: 45_000,
+      retryWrites: true,
+      retryReads: true,
+    }).catch((error) => {
+      console.error("[MongoDB] Connection error:", {
+        message: error.message,
+        code: error.code,
+        errorLabels: error.errorLabels,
+      });
+      // Reset the promise so we can retry
+      mongoClientPromise = null;
+      throw error;
     });
   }
 
