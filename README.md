@@ -1,14 +1,15 @@
-## Campus Ticket Ops
+## Ticket Counter
 
-A Next.js 14 ticket management system with admin registration, scanner validation, email delivery, and optional MongoDB persistence. Built with TypeScript and Tailwind CSS.
+A modern Next.js ticket management system with admin registration, QR scanner validation, email delivery, and MongoDB persistence. Built with TypeScript and Tailwind CSS.
 
 ### Features
 - Admin panel to register attendees (name + mail) and auto-generate ticket numbers
-- Automatic QR + barcode assets per ticket for phone-ready passes
-- Embedded camera scanner (with manual override) to validate and prevent duplicates
-- Nodemailer-powered confirmation emails with the QR/barcode inline
-- API routes for tickets, scanning, email re-sends, and metrics
-- In-memory storage by default with optional MongoDB support via `MONGODB_URI`
+- Automatic QR code generation per ticket for phone-ready passes
+- Embedded camera scanner to validate tickets and prevent duplicates
+- Nodemailer-powered confirmation emails with QR code inline
+- Attendee tracking page with search and validation
+- API routes for tickets, scanning, email, and metrics
+- MongoDB storage for persistent data
 
 ### Project Structure
 ```
@@ -28,33 +29,74 @@ types/
   ticket.ts               # Shared interfaces
 ```
 
-### Environment Variables
-```
-MONGODB_URI="mongodb+srv://..."    # REQUIRED - MongoDB connection string
-MONGODB_DB="tickets"               # optional, defaults to "tickets"
+### Quick Start
 
-# Gmail SMTP (defaults to sidftww@gmail.com)
-SMTP_HOST="smtp.gmail.com"         # optional, defaults to smtp.gmail.com
-SMTP_PORT="587"                    # optional, defaults to 587
-SMTP_USER="sidftww@gmail.com"       # optional, defaults to sidftww@gmail.com
-SMTP_PASS="your-app-password"      # REQUIRED: Gmail App Password (not regular password)
-EMAIL_FROM="sidftww@gmail.com"     # optional, defaults to sidftww@gmail.com
-```
+1. **Clone and install**
+   ```bash
+   git clone https://github.com/yourusername/ticket-sys.git
+   cd ticket-sys
+   pnpm install
+   ```
+
+2. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your MongoDB URI and Gmail App Password
+   ```
+
+3. **Run development server**
+   ```bash
+   pnpm dev
+   ```
+
+4. **Visit** `http://localhost:3000`
+
+### Environment Variables
+
+Copy `.env.example` to `.env.local` and configure:
+
+**Required:**
+- `MONGODB_URI` - MongoDB connection string (e.g., `mongodb+srv://user:pass@cluster.mongodb.net/`)
+- `SMTP_PASS` - Gmail App Password (see setup below)
+
+**Optional (with defaults):**
+- `MONGODB_DB` - Database name (defaults to `tickets`)
+- `SMTP_HOST` - SMTP server (defaults to `smtp.gmail.com`)
+- `SMTP_PORT` - SMTP port (defaults to `587`)
+- `SMTP_USER` - SMTP username (defaults to `sidftww@gmail.com`)
+- `EMAIL_FROM` - Email sender (defaults to `sidftww@gmail.com`)
 
 **Gmail App Password Setup:**
-1. Go to your Google Account settings
-2. Enable 2-Step Verification
-3. Go to "App passwords" (under Security)
-4. Generate a new app password for "Mail"
-5. Copy the 16-character password and set it as `SMTP_PASS`
+1. Go to [Google Account](https://myaccount.google.com/) → Security
+2. Enable 2-Step Verification (if not already enabled)
+3. Go to "App passwords" → Generate new app password
+4. Select "Mail" and your device
+5. Copy the 16-character password → Use as `SMTP_PASS`
 
-If `SMTP_PASS` is missing, ticket creation still works but email delivery is skipped with a logged warning.
+### Deployment to Vercel
+
+**Quick Steps:**
+1. Push code to GitHub
+2. Go to [vercel.com](https://vercel.com) → New Project
+3. Import your GitHub repository
+4. Add environment variables (`MONGODB_URI` and `SMTP_PASS`)
+5. Deploy!
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions or [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) for a quick start guide.
 
 ### Development
+
 ```bash
 pnpm install
-pnpm dev        # start Next.js dev server
-pnpm lint       # run ESLint via next lint
+pnpm dev        # Start Next.js dev server
+pnpm build      # Build for production
+pnpm start      # Start production server
+pnpm lint       # Run ESLint
 ```
 
-Visit `http://localhost:3000` for the dashboard. Admin and scanner routes reside at `/admin` and `/scanner`.
+### Routes
+
+- `/` - Dashboard with ticket metrics
+- `/admin` - Register new tickets
+- `/scanner` - Validate tickets via QR scan
+- `/attendees` - View all attendees and search

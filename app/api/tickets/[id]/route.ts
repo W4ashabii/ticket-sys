@@ -43,7 +43,7 @@ export async function PUT(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: error.errors[0]?.message ?? "Invalid payload" },
+        { message: error.issues[0]?.message ?? "Invalid payload" },
         { status: 400 }
       );
     }
