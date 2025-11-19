@@ -13,3 +13,10 @@ export function formatDate(value: Date | string | null) {
   });
 }
 
+export function formatSerialNumber(value?: number | null, digits = 4) {
+  if (typeof value !== "number" || Number.isNaN(value) || value <= 0) {
+    return "—";
+  }
+  return value.toString().padStart(digits, "0");
+}
+

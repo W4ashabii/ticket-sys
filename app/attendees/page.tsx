@@ -1,17 +1,28 @@
+import { redirect } from "next/navigation";
 import { listTickets } from "@/lib/storage";
 import { AttendeesList } from "@/components/attendees/AttendeesList";
+import { requireIssuerSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AttendeesPage() {
+  const session = await requireIssuerSession();
+  if (!session) {
+    redirect("/login");
+  }
+
   const tickets = await listTickets();
 
   // Convert tickets to plain objects for client components
   const serializedTickets = tickets.map((ticket) => ({
     id: ticket.id,
+    serialNumber: ticket.serialNumber,
     ticketNumber: ticket.ticketNumber,
     mail: ticket.mail,
     name: ticket.name,
+    universityId: ticket.universityId,
+    issuedByName: ticket.issuedByName,
+    issuedByEmail: ticket.issuedByEmail,
     createdAt: ticket.createdAt instanceof Date 
       ? ticket.createdAt.toISOString() 
       : ticket.createdAt,

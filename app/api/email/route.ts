@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getTicketById, getTicketByNumber } from "@/lib/storage";
 import { sendTicketEmail } from "@/lib/email";
+import { requireIssuerSession } from "@/lib/auth";
 
 const emailSchema = z
   .object({
@@ -17,6 +18,13 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const session = await requireIssuerSession();
+    if (!session) {
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
     const body = await request.json();
     const parsed = emailSchema.parse(body);
 

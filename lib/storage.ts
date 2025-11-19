@@ -7,13 +7,11 @@ import {
   Ticket,
   TicketStore,
 } from "@/types/ticket";
-
-function generateTicketNumber(seed: string) {
-  const sanitized = seed.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-  const base = sanitized.slice(-6) || sanitized || "UNI";
-  const timeFragment = Date.now().toString(36).toUpperCase().slice(-4);
-  const randomFragment = randomUUID().slice(0, 4).toUpperCase();
-  return `${base}-${timeFragment}${randomFragment}`;
+function generateTicketId(seed?: string) {
+  const base = seed?.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(-4) || "IIMS";
+  const timestamp = Date.now().toString(36).toUpperCase().slice(-4);
+  const randomSegment = randomUUID().replace(/-/g, "").toUpperCase().slice(0, 4);
+  return `${base}-${timestamp}${randomSegment}`;
 }
 
 async function generateQRCode(ticketNumber: string): Promise<string> {
@@ -30,6 +28,50 @@ async function generateQRCode(ticketNumber: string): Promise<string> {
       `Failed to generate QR code: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
+}
+
+async function getNextSerialNumber(col: Collection<Ticket>): Promise<number> {
+  const counters = col.db.collection<{ _id: string; value: number }>("counters");
+  const result = await counters.findOneAndUpdate(
+    { _id: "ticketSerial" },
+    { $inc: { value: 1 } },
+    { upsert: true, returnDocument: "after" }
+  );
+  const updatedDoc = result?.value as { value: number } | null | undefined;
+  const nextValue = updatedDoc?.value;
+  if (typeof nextValue === "number" && Number.isFinite(nextValue)) {
+    return nextValue;
+  }
+  // Fallback if the driver returns null before the upsert materializes
+  const inserted = await counters.findOne({ _id: "ticketSerial" });
+  return inserted?.value ?? 1;
+}
+
+async function normalizeSerialNumbers(col: Collection<Ticket>): Promise<void> {
+  const tickets = await col
+    .find({}, { projection: { id: 1, serialNumber: 1 } })
+    .sort({ serialNumber: 1 })
+    .toArray();
+
+  await Promise.all(
+    tickets.map((ticket, index) => {
+      const expectedSerial = index + 1;
+      if (ticket.serialNumber === expectedSerial) {
+        return Promise.resolve();
+      }
+      return col.updateOne(
+        { id: ticket.id },
+        { $set: { serialNumber: expectedSerial } }
+      );
+    })
+  );
+
+  const counters = col.db.collection<{ _id: string; value: number }>("counters");
+  await counters.updateOne(
+    { _id: "ticketSerial" },
+    { $set: { value: tickets.length } },
+    { upsert: true }
+  );
 }
 
 let mongoClientPromise: Promise<MongoClient> | null = null;
@@ -69,6 +111,7 @@ async function getMongoCollection(): Promise<Collection<Ticket>> {
 
   await collection.createIndex({ ticketNumber: 1 }, { unique: true });
   await collection.createIndex({ mail: 1 });
+  await collection.createIndex({ serialNumber: 1 }, { unique: true, sparse: true });
 
   return collection;
 }
@@ -98,19 +141,26 @@ class MongoTicketStore implements TicketStore {
 
   async createTicket(payload: CreateTicketRequest): Promise<Ticket> {
     const col = await this.collection();
-    let ticketNumber = generateTicketNumber(payload.mail);
-
+    const serialNumber = await getNextSerialNumber(col);
+    let ticketNumber = generateTicketId(payload.name || payload.mail);
     while (await col.findOne({ ticketNumber })) {
-      ticketNumber = generateTicketNumber(payload.mail);
+      ticketNumber = generateTicketId(payload.mail);
     }
 
     const qrCodeDataUrl = await generateQRCode(ticketNumber);
+    const normalizedUniversityId = payload.universityId.trim().toUpperCase();
+    const issuedByName = payload.issuedByName?.trim() ?? "Issuer";
+    const issuedByEmail = payload.issuedByEmail?.trim().toLowerCase() ?? "";
 
     const ticket: Ticket = {
       id: randomUUID(),
+      serialNumber,
       ticketNumber,
       mail: payload.mail.trim().toLowerCase(),
       name: payload.name.trim(),
+      universityId: normalizedUniversityId,
+      issuedByName,
+      issuedByEmail,
       createdAt: new Date(),
       isValid: true,
       scannedAt: null,
@@ -123,7 +173,7 @@ class MongoTicketStore implements TicketStore {
 
   async updateTicket(
     id: string,
-    updates: Partial<Omit<Ticket, "id" | "createdAt" | "ticketNumber">>
+    updates: Partial<Omit<Ticket, "id" | "createdAt" | "ticketNumber" | "serialNumber">>
   ): Promise<Ticket | null> {
     const col = await this.collection();
     const result = await col.findOneAndUpdate(
@@ -136,8 +186,13 @@ class MongoTicketStore implements TicketStore {
 
   async deleteTicket(id: string): Promise<boolean> {
     const col = await this.collection();
-    const result = await col.deleteOne({ id });
-    return result.deletedCount > 0;
+    const ticket = await col.findOne({ id }, { projection: { serialNumber: 1 } });
+    if (!ticket) {
+      return false;
+    }
+    await col.deleteOne({ id });
+    await normalizeSerialNumbers(col);
+    return true;
   }
 
   async scanTicket(ticketNumber: string): Promise<ScanResult> {
@@ -179,6 +234,11 @@ class MongoTicketStore implements TicketStore {
     const { _id, ...ticketData } = ticket;
     return {
       ...ticketData,
+      serialNumber:
+        typeof ticketData.serialNumber === "number" ? ticketData.serialNumber : 0,
+      universityId: ticketData.universityId ?? "",
+      issuedByName: ticketData.issuedByName ?? "",
+      issuedByEmail: ticketData.issuedByEmail ?? "",
       createdAt: ticketData.createdAt instanceof Date 
         ? ticketData.createdAt 
         : new Date(ticketData.createdAt),
@@ -224,7 +284,7 @@ export async function createTicket(payload: CreateTicketRequest) {
 
 export async function updateTicket(
   id: string,
-  updates: Partial<Omit<Ticket, "id" | "createdAt" | "ticketNumber">>
+  updates: Partial<Omit<Ticket, "id" | "createdAt" | "ticketNumber" | "serialNumber">>
 ) {
   const store = await resolveStore();
   return store.updateTicket(id, updates);

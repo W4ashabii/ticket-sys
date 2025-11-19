@@ -1,8 +1,15 @@
+import { redirect } from "next/navigation";
 import { Scanner } from "@/components/scanner/Scanner";
+import { requireIssuerSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default function ScannerPage() {
+export default async function ScannerPage() {
+  const session = await requireIssuerSession();
+  if (!session) {
+    redirect("/login");
+  }
+
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6 sm:gap-8 lg:gap-12 px-4 py-6 sm:py-8 lg:py-12 sm:px-6">
       <div className="rounded-2xl border border-black/10 bg-white/80 backdrop-blur-sm p-4 sm:p-6 lg:p-8 shadow-modern">

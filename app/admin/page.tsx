@@ -1,8 +1,15 @@
+import { redirect } from "next/navigation";
 import { TicketForm } from "@/components/admin/TicketForm";
+import { requireIssuerSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const session = await requireIssuerSession();
+  if (!session) {
+    redirect("/login");
+  }
+
   return (
     <section className="space-y-6 sm:space-y-8 lg:space-y-12">
       <div className="rounded-2xl border border-black/10 bg-white/80 backdrop-blur-sm p-4 sm:p-6 lg:p-8 shadow-modern">
@@ -18,7 +25,12 @@ export default function AdminPage() {
           phone wallets and repeat-free scanning.
         </p>
       </div>
-      <TicketForm />
+      <TicketForm
+        issuer={{
+          name: session.user?.name ?? "",
+          email: session.user?.email ?? "",
+        }}
+      />
     </section>
   );
 }

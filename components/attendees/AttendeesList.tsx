@@ -6,13 +6,17 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatSerialNumber } from "@/lib/utils";
 
 interface AttendeeTicket {
   id: string;
+  serialNumber: number;
   ticketNumber: string;
   mail: string;
   name: string;
+  universityId: string;
+  issuedByName: string;
+  issuedByEmail: string;
   createdAt: string | Date;
   isValid: boolean;
   scannedAt: string | Date | null;
@@ -38,7 +42,11 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
       (ticket) =>
         ticket.name.toLowerCase().includes(query) ||
         ticket.mail.toLowerCase().includes(query) ||
-        ticket.ticketNumber.toLowerCase().includes(query)
+        ticket.ticketNumber.toLowerCase().includes(query) ||
+        ticket.universityId.toLowerCase().includes(query) ||
+        formatSerialNumber(ticket.serialNumber).toLowerCase().includes(query) ||
+        (ticket.issuedByName ?? "").toLowerCase().includes(query) ||
+        (ticket.issuedByEmail ?? "").toLowerCase().includes(query)
     );
   }, [tickets, searchQuery]);
 
@@ -130,8 +138,10 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
                   <tr className="text-left text-xs font-semibold uppercase tracking-wider text-black/70 border-b border-black/10">
                     <th className="py-3 pr-4">Name</th>
                     <th className="py-3 pr-4 hidden sm:table-cell">Email</th>
-                    <th className="py-3 pr-4">Ticket</th>
-                    <th className="py-3 pr-4">Status</th>
+                  <th className="py-3 pr-4">Ticket</th>
+                  <th className="py-3 pr-4">University ID</th>
+                  <th className="py-3 pr-4">Status</th>
+                  <th className="py-3 pr-4">Issued By</th>
                     <th className="py-3 pr-4 hidden lg:table-cell">Created</th>
                     <th className="py-3 pr-4 hidden lg:table-cell">Scanned</th>
                     <th className="py-3">Actions</th>
@@ -155,7 +165,13 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
                       {ticket.mail}
                     </td>
                     <td className="py-4 font-mono text-xs font-semibold text-black">
-                      {ticket.ticketNumber}
+                      <div>{ticket.ticketNumber}</div>
+                      <div className="text-[11px] text-black/60">
+                        Serial {formatSerialNumber(ticket.serialNumber)}
+                      </div>
+                    </td>
+                    <td className="py-4 text-xs font-mono text-black/80">
+                      {ticket.universityId || "—"}
                     </td>
                     <td className="py-4">
                       <span
@@ -167,6 +183,10 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
                       >
                         {ticket.isValid ? "Valid" : "Used"}
                       </span>
+                    </td>
+                    <td className="py-4 text-xs text-black">
+                      <div className="font-semibold">{ticket.issuedByName || "—"}</div>
+                      <div className="text-black/60">{ticket.issuedByEmail || "—"}</div>
                     </td>
                     <td className="py-4 text-xs text-black/50 hidden lg:table-cell">
                       {formatDate(

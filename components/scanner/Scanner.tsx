@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { useToast } from "@/components/ui/ToastProvider";
+import { formatSerialNumber } from "@/lib/utils";
 import type { ScanResult } from "@/types/ticket";
 
 const QrScanner = dynamic(
@@ -174,12 +175,25 @@ export function Scanner() {
                   <span className="font-mono font-semibold">{result.ticket.ticketNumber}</span>
                 </p>
                 <p className="text-black">
+                  <span className="font-semibold text-xs">Serial:</span>{" "}
+                  <span className="font-mono">{formatSerialNumber(result.ticket.serialNumber)}</span>
+                </p>
+                <p className="text-black">
                   <span className="font-semibold text-xs">Attendee:</span>{" "}
                   {result.ticket.name}
                 </p>
                 <p className="text-black/60">
                   <span className="font-semibold text-xs">Mail:</span>{" "}
                   {result.ticket.mail}
+                </p>
+                <p className="text-black/80">
+                  <span className="font-semibold text-xs">University ID:</span>{" "}
+                  <span className="font-mono">{result.ticket.universityId || "—"}</span>
+                </p>
+                <p className="text-black/80">
+                  <span className="font-semibold text-xs">Issued by:</span>{" "}
+                  {result.ticket.issuedByName || "—"}{" "}
+                  <span className="text-black/60">({result.ticket.issuedByEmail || "—"})</span>
                 </p>
                 <p className="text-black">
                   <span className="font-semibold text-xs">Status:</span>{" "}

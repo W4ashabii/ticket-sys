@@ -14,9 +14,13 @@ export default async function DashboardPage() {
   // Convert tickets to plain objects for client components
   const latestTickets = tickets.slice(0, 5).map((ticket) => ({
     id: ticket.id,
+    serialNumber: ticket.serialNumber,
     ticketNumber: ticket.ticketNumber,
     mail: ticket.mail,
     name: ticket.name,
+    universityId: ticket.universityId,
+    issuedByName: ticket.issuedByName,
+    issuedByEmail: ticket.issuedByEmail,
     createdAt: ticket.createdAt instanceof Date 
       ? ticket.createdAt.toISOString() 
       : ticket.createdAt,
@@ -103,9 +107,11 @@ export default async function DashboardPage() {
               <thead>
                 <tr className="text-left text-xs font-semibold uppercase tracking-wider text-black/70 border-b border-black/10">
                   <th className="py-2 sm:py-3 pr-2">Ticket</th>
+                  <th className="py-2 sm:py-3 pr-2">University ID</th>
                   <th className="py-2 sm:py-3 pr-2 hidden sm:table-cell">Attendee</th>
                   <th className="py-2 sm:py-3 pr-2 hidden md:table-cell">Mail</th>
                   <th className="py-2 sm:py-3 pr-2">Status</th>
+                  <th className="py-2 sm:py-3 pr-2">Issued By</th>
                   <th className="py-2 sm:py-3 pr-2 hidden lg:table-cell">Created</th>
                   <th className="py-2 sm:py-3">Actions</th>
                 </tr>
@@ -114,7 +120,7 @@ export default async function DashboardPage() {
               {latestTickets.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={8}
                     className="py-10 text-center text-black/60 text-sm"
                   >
                     No tickets yet. Use the admin panel to get started.

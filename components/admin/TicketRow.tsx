@@ -3,14 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/ToastProvider";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatSerialNumber } from "@/lib/utils";
 
 interface TicketRowProps {
   ticket: {
     id: string;
+    serialNumber: number;
     ticketNumber: string;
     mail: string;
     name: string;
+    universityId: string;
+    issuedByName: string;
+    issuedByEmail: string;
     createdAt: string | Date;
     isValid: boolean;
     scannedAt: string | Date | null;
@@ -67,9 +71,13 @@ export function TicketRow({ ticket }: TicketRowProps) {
       <td className="py-3 sm:py-4 font-mono text-xs font-semibold text-black">
         <div>
           <div>{ticket.ticketNumber}</div>
+          <div className="text-[11px] text-black/60">
+            Serial {formatSerialNumber(ticket.serialNumber)}
+          </div>
           <div className="text-xs text-black/60 sm:hidden mt-1">{ticket.name}</div>
         </div>
       </td>
+      <td className="py-3 sm:py-4 text-xs font-mono text-black/80">{ticket.universityId || "—"}</td>
       <td className="py-3 sm:py-4 text-xs sm:text-sm font-medium text-black hidden sm:table-cell">{ticket.name}</td>
       <td className="py-3 sm:py-4 text-xs sm:text-sm text-black/60 hidden md:table-cell">{ticket.mail}</td>
       <td className="py-3 sm:py-4">
@@ -82,6 +90,10 @@ export function TicketRow({ ticket }: TicketRowProps) {
         >
           {ticket.isValid ? "Valid" : "Used"}
         </span>
+      </td>
+      <td className="py-3 sm:py-4 text-[11px] sm:text-xs text-black">
+        <div className="font-semibold">{ticket.issuedByName || "—"}</div>
+        <div className="text-black/60">{ticket.issuedByEmail || "—"}</div>
       </td>
       <td className="py-3 sm:py-4 text-xs text-black/50 hidden lg:table-cell">
         {formatDate(

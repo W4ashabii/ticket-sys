@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import type { Ticket } from "@/types/ticket";
+import { formatSerialNumber } from "@/lib/utils";
 
 // Default to sidftww@gmail.com as sender
 const emailFrom = process.env.EMAIL_FROM ?? process.env.SMTP_USER ?? "sidftww@gmail.com";
@@ -40,6 +41,8 @@ export async function sendTicketEmail(ticket: Ticket) {
   }
 
   console.log(`[email] Sending ticket ${ticket.ticketNumber} to ${ticket.mail}`);
+  const serialDisplay = formatSerialNumber(ticket.serialNumber, 5);
+  const universityId = ticket.universityId || "N/A";
 
   const html = `
     <!DOCTYPE html>
@@ -57,9 +60,13 @@ export async function sendTicketEmail(ticket: Ticket) {
         </div>
         
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; color: white;">
-          <div style="text-align: center; margin-bottom: 16px;">
+          <div style="text-align: center; margin-bottom: 12px;">
             <p style="margin: 0; font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Ticket Number</p>
             <p style="margin: 8px 0 0; font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 2px;">${ticket.ticketNumber}</p>
+          </div>
+          <div style="text-align: center;">
+            <p style="margin: 0; font-size: 11px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Serial Number</p>
+            <p style="margin: 6px 0 0; font-size: 20px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 1px;">${serialDisplay}</p>
           </div>
         </div>
 
@@ -72,6 +79,17 @@ export async function sendTicketEmail(ticket: Ticket) {
             <tr>
               <td style="padding: 8px 0; color: #64748b; font-size: 14px; font-weight: 500;">Email:</td>
               <td style="padding: 8px 0; color: #1e293b; font-size: 14px; text-align: right;">${ticket.mail}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 14px; font-weight: 500;">University ID (IIMS):</td>
+              <td style="padding: 8px 0; color: #1e293b; font-size: 14px; text-align: right; font-weight: 600;">${universityId}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-size: 14px; font-weight: 500;">Issued By:</td>
+              <td style="padding: 8px 0; color: #1e293b; font-size: 14px; text-align: right; font-weight: 600;">
+                ${ticket.issuedByName}
+                <div style="font-size: 12px; color: #64748b; font-weight: 500;">${ticket.issuedByEmail}</div>
+              </td>
             </tr>
             <tr>
               <td style="padding: 8px 0; color: #64748b; font-size: 14px; font-weight: 500;">Issued:</td>
@@ -114,7 +132,7 @@ export async function sendTicketEmail(ticket: Ticket) {
   await transport.sendMail({
     from: emailFrom,
     to: ticket.mail,
-    subject: `Your mobile ticket (${ticket.ticketNumber})`,
+    subject: `Your mobile ticket (${ticket.ticketNumber} • Serial ${serialDisplay})`,
     html,
     attachments: [
       {
