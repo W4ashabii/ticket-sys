@@ -32,6 +32,7 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
   const { pushToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [validatingId, setValidatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const filteredTickets = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -93,6 +94,45 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
       });
     } finally {
       setValidatingId(null);
+    }
+  };
+
+  const handleDelete = async (ticket: AttendeeTicket) => {
+    if (!confirm(`Delete ticket ${ticket.ticketNumber} for ${ticket.name}? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingId(ticket.id);
+    try {
+      const response = await fetch(`/api/tickets/${ticket.id}`, {
+        method: "DELETE",
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          payload.message ?? `Failed to delete ticket (${response.status})`
+        );
+      }
+
+      pushToast({
+        variant: "success",
+        title: "Ticket deleted",
+        description: `Ticket ${ticket.ticketNumber} has been removed.`,
+      });
+
+      router.refresh();
+    } catch (error) {
+      console.error("[AttendeesList:handleDelete]", error);
+      pushToast({
+        variant: "error",
+        title: "Delete failed",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -205,20 +245,30 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
                         : "—"}
                     </td>
                     <td className="py-4">
-                      <Button
-                        variant={ticket.isValid ? "primary" : "secondary"}
-                        onClick={() => handleValidate(ticket)}
-                        disabled={
-                          !ticket.isValid || validatingId === ticket.id
-                        }
-                        className="text-xs px-3 py-1.5 whitespace-nowrap"
-                      >
-                        {validatingId === ticket.id
-                          ? "Validating..."
-                          : ticket.isValid
-                          ? "Validate"
-                          : "Used"}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant={ticket.isValid ? "primary" : "secondary"}
+                          onClick={() => handleValidate(ticket)}
+                          disabled={
+                            !ticket.isValid || validatingId === ticket.id
+                          }
+                          className="text-xs px-3 py-1.5 whitespace-nowrap"
+                        >
+                          {validatingId === ticket.id
+                            ? "Validating..."
+                            : ticket.isValid
+                            ? "Validate"
+                            : "Used"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleDelete(ticket)}
+                          disabled={deletingId === ticket.id}
+                          className="text-xs px-3 py-1.5 whitespace-nowrap text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          {deletingId === ticket.id ? "Deleting..." : "Delete"}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
