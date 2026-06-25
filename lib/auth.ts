@@ -29,7 +29,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user }: { user?: User | null }) {
+    async signIn({ user }: { user?: any }) {
       const email = (user as { email?: string | null } | null)?.email ?? null;
       return isIssuerEmail(email);
     },
@@ -47,7 +47,7 @@ export const authOptions = {
   secret: authSecret,
 };
 
-const handler = NextAuth(authOptions);
+const handler = NextAuth(authOptions as any);
 
 type IssuerSession = Session & {
   user?: Session["user"] & { isIssuer?: boolean };
