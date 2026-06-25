@@ -47,14 +47,14 @@ export const authOptions = {
   secret: authSecret,
 };
 
-const handler = NextAuth(authOptions as any);
+const handler = NextAuth(authOptions);
 
 type IssuerSession = Session & {
   user?: Session["user"] & { isIssuer?: boolean };
 };
 
 export async function requireIssuerSession(): Promise<IssuerSession | null> {
-  const session = (await getServerSession(authOptions as any)) as IssuerSession | null;
+  const session = await getServerSession(authOptions) as IssuerSession | null;
   if (!session?.user?.isIssuer) {
     return null;
   }
