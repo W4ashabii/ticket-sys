@@ -186,10 +186,7 @@ export function Scanner() {
                   <span className="font-semibold text-xs">Mail:</span>{" "}
                   {result.ticket.mail}
                 </p>
-                <p className="text-black/80">
-                  <span className="font-semibold text-xs">University ID:</span>{" "}
-                  <span className="font-mono">{result.ticket.universityId || "—"}</span>
-                </p>
+
                 <p className="text-black/80">
                   <span className="font-semibold text-xs">Issued by:</span>{" "}
                   {result.ticket.issuedByName || "—"}{" "}

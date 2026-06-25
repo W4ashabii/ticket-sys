@@ -42,7 +42,7 @@ export async function sendTicketEmail(ticket: Ticket) {
 
   console.log(`[email] Sending ticket ${ticket.ticketNumber} to ${ticket.mail}`);
   const serialDisplay = formatSerialNumber(ticket.serialNumber, 5);
-  const universityId = ticket.universityId || "N/A";
+
 
   const html = `
     <!DOCTYPE html>
@@ -80,10 +80,7 @@ export async function sendTicketEmail(ticket: Ticket) {
               <td style="padding: 8px 0; color: #64748b; font-size: 14px; font-weight: 500;">Email:</td>
               <td style="padding: 8px 0; color: #1e293b; font-size: 14px; text-align: right;">${ticket.mail}</td>
             </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #64748b; font-size: 14px; font-weight: 500;">University ID (IIMS):</td>
-              <td style="padding: 8px 0; color: #1e293b; font-size: 14px; text-align: right; font-weight: 600;">${universityId}</td>
-            </tr>
+
             <tr>
               <td style="padding: 8px 0; color: #64748b; font-size: 14px; font-weight: 500;">Issued By:</td>
               <td style="padding: 8px 0; color: #1e293b; font-size: 14px; text-align: right; font-weight: 600;">

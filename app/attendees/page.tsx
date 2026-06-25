@@ -20,7 +20,7 @@ export default async function AttendeesPage() {
     ticketNumber: ticket.ticketNumber,
     mail: ticket.mail,
     name: ticket.name,
-    universityId: ticket.universityId,
+
     issuedByName: ticket.issuedByName,
     issuedByEmail: ticket.issuedByEmail,
     createdAt: ticket.createdAt instanceof Date 

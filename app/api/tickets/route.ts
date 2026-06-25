@@ -7,7 +7,7 @@ import { requireIssuerSession } from "@/lib/auth";
 const createTicketSchema = z.object({
   name: z.string().min(2, "Name is required"),
   mail: z.string().email("Valid mail required"),
-  universityId: z.string().min(3, "University ID is required"),
+
 });
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,6 @@ export async function POST(request: Request) {
     const parsed = createTicketSchema.parse(body);
     const ticket = await createTicket({
       ...parsed,
-      universityId: parsed.universityId.trim(),
       issuedByName: session.user?.name ?? session.user?.email ?? "Issuer",
       issuedByEmail: session.user?.email ?? "",
     });

@@ -148,7 +148,6 @@ class MongoTicketStore implements TicketStore {
     }
 
     const qrCodeDataUrl = await generateQRCode(ticketNumber);
-    const normalizedUniversityId = payload.universityId.trim().toUpperCase();
     const issuedByName = payload.issuedByName?.trim() ?? "Issuer";
     const issuedByEmail = payload.issuedByEmail?.trim().toLowerCase() ?? "";
 
@@ -158,7 +157,6 @@ class MongoTicketStore implements TicketStore {
       ticketNumber,
       mail: payload.mail.trim().toLowerCase(),
       name: payload.name.trim(),
-      universityId: normalizedUniversityId,
       issuedByName,
       issuedByEmail,
       createdAt: new Date(),
@@ -236,7 +234,6 @@ class MongoTicketStore implements TicketStore {
       ...ticketData,
       serialNumber:
         typeof ticketData.serialNumber === "number" ? ticketData.serialNumber : 0,
-      universityId: ticketData.universityId ?? "",
       issuedByName: ticketData.issuedByName ?? "",
       issuedByEmail: ticketData.issuedByEmail ?? "",
       createdAt: ticketData.createdAt instanceof Date 

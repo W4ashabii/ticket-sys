@@ -14,7 +14,6 @@ interface AttendeeTicket {
   ticketNumber: string;
   mail: string;
   name: string;
-  universityId: string;
   issuedByName: string;
   issuedByEmail: string;
   createdAt: string | Date;
@@ -44,7 +43,6 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
         ticket.name.toLowerCase().includes(query) ||
         ticket.mail.toLowerCase().includes(query) ||
         ticket.ticketNumber.toLowerCase().includes(query) ||
-        ticket.universityId.toLowerCase().includes(query) ||
         formatSerialNumber(ticket.serialNumber).toLowerCase().includes(query) ||
         (ticket.issuedByName ?? "").toLowerCase().includes(query) ||
         (ticket.issuedByEmail ?? "").toLowerCase().includes(query)
@@ -178,10 +176,9 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
                   <tr className="text-left text-xs font-semibold uppercase tracking-wider text-black/70 border-b border-black/10">
                     <th className="py-3 pr-4">Name</th>
                     <th className="py-3 pr-4 hidden sm:table-cell">Email</th>
-                  <th className="py-3 pr-4">Ticket</th>
-                  <th className="py-3 pr-4">University ID</th>
-                  <th className="py-3 pr-4">Status</th>
-                  <th className="py-3 pr-4">Issued By</th>
+                    <th className="py-3 pr-4">Ticket</th>
+                    <th className="py-3 pr-4">Status</th>
+                    <th className="py-3 pr-4">Issued By</th>
                     <th className="py-3 pr-4 hidden lg:table-cell">Created</th>
                     <th className="py-3 pr-4 hidden lg:table-cell">Scanned</th>
                     <th className="py-3">Actions</th>
@@ -209,9 +206,6 @@ export function AttendeesList({ tickets }: AttendeesListProps) {
                       <div className="text-[11px] text-black/60">
                         Serial {formatSerialNumber(ticket.serialNumber)}
                       </div>
-                    </td>
-                    <td className="py-4 text-xs font-mono text-black/80">
-                      {ticket.universityId || "—"}
                     </td>
                     <td className="py-4">
                       <span
