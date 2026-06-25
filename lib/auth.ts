@@ -1,7 +1,9 @@
 import { randomBytes } from "node:crypto";
 import NextAuth, { getServerSession } from "next-auth/next";
-import type { Session, User } from "next-auth";
+import type { Session } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+// stray signIn removed
+
 
 const allowedEmails = new Set(
   (process.env.ALLOWED_ISSUER_EMAILS ?? "")
@@ -29,7 +31,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user }: { user?: any }) {
+    async signIn({ user }: { user?: { email?: string | null } | null }) {
       const email = (user as { email?: string | null } | null)?.email ?? null;
       return isIssuerEmail(email);
     },
@@ -47,7 +49,7 @@ export const authOptions = {
   secret: authSecret,
 };
 
-const handler = NextAuth(authOptions as any);
+const handler = NextAuth(authOptions);
 
 type IssuerSession = Session & {
   user?: Session["user"] & { isIssuer?: boolean };
