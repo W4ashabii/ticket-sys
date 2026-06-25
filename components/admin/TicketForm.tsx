@@ -24,7 +24,6 @@ export function TicketForm({ issuer }: TicketFormProps) {
   const [formValues, setFormValues] = useState({
     name: "",
     mail: "",
-    universityId: "",
   });
 
   const handleChange = (field: keyof typeof formValues, value: string) => {
@@ -56,7 +55,6 @@ export function TicketForm({ issuer }: TicketFormProps) {
       setFormValues({
         name: "",
         mail: "",
-        universityId: "",
       });
 
       pushToast({
@@ -114,19 +112,6 @@ export function TicketForm({ issuer }: TicketFormProps) {
             onChange={(event) => handleChange("mail", event.target.value)}
             required
           />
-          <div className="space-y-2">
-            <Input
-              label="University ID (IIMS watermark)"
-              name="universityId"
-              placeholder="IIMS-2024-001"
-              value={formValues.universityId}
-              onChange={(event) => handleChange("universityId", event.target.value.toUpperCase())}
-              required
-            />
-            <p className="text-xs text-black/50 font-normal">
-              Appears as the IIMS watermark on the ticket email. Serial numbers are assigned automatically when issuing the ticket.
-            </p>
-          </div>
           <Button type="submit" loading={loading} fullWidth>
             Issue ticket
           </Button>
@@ -158,8 +143,7 @@ export function TicketForm({ issuer }: TicketFormProps) {
                 <dd className="text-black/60">{lastTicket.mail}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="font-semibold text-black text-xs">University ID</dt>
-                <dd className="font-mono text-black/80">{lastTicket.universityId || "—"}</dd>
+
               </div>
               <div className="flex justify-between">
                 <dt className="font-semibold text-black text-xs">Issued by</dt>

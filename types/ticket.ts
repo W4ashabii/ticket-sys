@@ -4,7 +4,7 @@ export interface Ticket {
   ticketNumber: string;
   mail: string;
   name: string;
-  universityId: string;
+
   issuedByName: string;
   issuedByEmail: string;
   createdAt: Date;
@@ -16,7 +16,7 @@ export interface Ticket {
 export interface CreateTicketRequest {
   mail: string;
   name: string;
-  universityId: string;
+
   issuedByName?: string;
   issuedByEmail?: string;
 }

@@ -12,7 +12,6 @@ interface TicketRowProps {
     ticketNumber: string;
     mail: string;
     name: string;
-    universityId: string;
     issuedByName: string;
     issuedByEmail: string;
     createdAt: string | Date;
@@ -77,7 +76,7 @@ export function TicketRow({ ticket }: TicketRowProps) {
           <div className="text-xs text-black/60 sm:hidden mt-1">{ticket.name}</div>
         </div>
       </td>
-      <td className="py-3 sm:py-4 text-xs font-mono text-black/80">{ticket.universityId || "—"}</td>
+
       <td className="py-3 sm:py-4 text-xs sm:text-sm font-medium text-black hidden sm:table-cell">{ticket.name}</td>
       <td className="py-3 sm:py-4 text-xs sm:text-sm text-black/60 hidden md:table-cell">{ticket.mail}</td>
       <td className="py-3 sm:py-4">
