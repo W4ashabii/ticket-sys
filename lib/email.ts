@@ -97,14 +97,7 @@ export async function sendTicketEmail(ticket: Ticket) {
         </p>
       </div>
 
-      <div style="text-align: center; margin-bottom: 24px; background: #f8fafc; padding: 12px; border-radius: 8px;">
-        <p style="margin: 0 0 6px; font-size: 13px; color: #64748b; font-weight: 500;">Tech Partner</p>
-        <p style="margin: 0 0 12px; font-size: 18px; font-weight: 600; color: #1e293b;">bintech</p>
-        <p style="margin: 0 0 6px; font-size: 13px; color: #64748b; font-weight: 500;">Supported By</p>
-        <p style="margin: 0; font-size: 16px; font-weight: 500; color: #1e293b;">
-          HERALD COLLEGE &nbsp;|&nbsp; HimalayaAI &nbsp;|&nbsp; TARKA
-        </p>
-      </div>
+
 
       <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
         <h3 style="margin: 0 0 12px; font-size: 16px; color: #1e293b;">Workshop Requirements</h3>
